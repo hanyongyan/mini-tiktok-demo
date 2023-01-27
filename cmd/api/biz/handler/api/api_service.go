@@ -4,8 +4,6 @@ package api
 
 import (
 	"context"
-	"fmt"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"mini-tiktok-hanyongyan/cmd/api/biz/model/api"
 	"mini-tiktok-hanyongyan/cmd/api/biz/rpc"
 	"mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
@@ -35,30 +33,31 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 func UserRegister(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.UserRegisterReq
+	var resp api.UserRegisterResp
 	//  username and password bind req
 	err = c.BindAndValidate(&req)
-	req.Username = c.PostForm("username")
-	req.Password = c.PostForm("password")
-	fmt.Println(req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
-	// 调用 userService 的服务
+	// 调用 userService 的服务 进行注册用户
 	registerResponse, err := rpc.UserRpcClient.Register(ctx, &userservice.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
+	// 注册失败
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": "Authorization failed", "message": err.Error()})
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	resp := &api.UserRegisterResp{
-		StatusCode:    int64(registerResponse.StatusCode),
-		StatusMessage: registerResponse.StatusMsg,
-		UserID:        registerResponse.UserId,
-		Token:         registerResponse.Token,
-	}
+	resp.StatusCode = int64(registerResponse.StatusCode)
+	resp.StatusMessage = registerResponse.StatusMsg
+	resp.UserID = registerResponse.UserId
+	resp.Token = registerResponse.Token
 
 	c.JSON(consts.StatusOK, resp)
 }

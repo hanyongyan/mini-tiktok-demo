@@ -20,11 +20,18 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *userservice.DouyinUser
 
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinUserRegisterRequest) (resp *userservice.DouyinUserRegisterResponse, err error) {
-	q := query.Q
+	q := query.Q.TUser
 
 	newUser := &model.TUser{Name: req.Username, Password: req.Password}
-	fmt.Println(newUser)
-	err = q.WithContext(context.Background()).TUser.Create(newUser)
+
+	// 查询数据库查看用户是否存在
+	userIsExist, err := q.WithContext(ctx).Where(q.Name.Eq(newUser.Name)).First()
+	if userIsExist != nil {
+		err = fmt.Errorf("用户已存在，注册失败：%w", err)
+		return
+	}
+	// 创建用户
+	err = q.WithContext(ctx).Create(newUser)
 	if err != nil {
 		err = fmt.Errorf("注册失败：%w", err)
 		return
@@ -37,10 +44,9 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 	}
 	resp = &userservice.DouyinUserRegisterResponse{
 		StatusCode: 0,
-		StatusMsg:  "登陆成功",
+		StatusMsg:  "注册成功",
 		UserId:     newUser.ID,
 		Token:      token,
-		//UserId: 111,
 	}
 	return
 }
