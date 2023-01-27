@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	userservice "mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
+	"mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
 	"mini-tiktok-hanyongyan/pkg/dal/model"
 	"mini-tiktok-hanyongyan/pkg/dal/query"
 	"mini-tiktok-hanyongyan/pkg/utils"
@@ -14,7 +15,34 @@ type UserServiceImpl struct{}
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *userservice.DouyinUserLoginRequest) (resp *userservice.DouyinUserLoginResponse, err error) {
-	// TODO: Your code here...
+	q := query.Q.TUser
+
+	// 查询当前用户是否存在
+	user, err := q.WithContext(ctx).Where(q.Name.Eq(req.Username)).First()
+	if err != nil {
+		err = errors.New("用户不存在")
+		return
+	} else if user.Password != req.Password {
+		// 说明密码错误
+		err = errors.New("密码错误！")
+		return
+	}
+	token, err := utils.CreateToken(user.ID)
+	if err != nil {
+		err = errors.New("token 生成错误")
+		return
+	}
+	// 由于返回值是进行定义了一个指针，我们不能直接对其中的属性进行赋值，使用下面的用法会报错
+	//resp.StatusCode = 0
+	//resp.StatusMsg = "登陆成功"
+	//resp.Token = token
+	//resp.UserId = user.ID
+	resp = &userservice.DouyinUserLoginResponse{
+		StatusCode: 0,
+		StatusMsg:  "登陆成功",
+		UserId:     user.ID,
+		Token:      token,
+	}
 	return
 }
 

@@ -67,14 +67,25 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.UserLoginReq
+	var resp api.UserLoginResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.UserLoginResp)
-
+	// 调用 userService 验证是否能够登陆成功
+	response, err := rpc.UserRpcClient.Login(ctx,
+		&userservice.DouyinUserLoginRequest{Password: req.Password, Username: req.Username})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	resp.StatusCode = 0
+	resp.Token = response.Token
+	resp.StatusMessage = response.StatusMsg
+	resp.UserID = response.UserId
 	c.JSON(consts.StatusOK, resp)
 }
 
