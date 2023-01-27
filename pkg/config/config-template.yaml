@@ -1,0 +1,10 @@
+db:
+  addr: "localhost:3306"
+  username: "root"
+  password: "root"
+  database: "mini_tiktok"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  database: 0
