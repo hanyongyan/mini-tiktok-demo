@@ -13,7 +13,7 @@ type Claims struct {
 
 // CreateToken 生成 token
 func CreateToken(userId int64) (string, error) {
-	expiretime := time.Now().Add(24 * 7 * time.Hour)
+	expiretime := time.Now().Add(config.TokenExpiredTime)
 	nowTime := time.Now()
 
 	claims := Claims{
