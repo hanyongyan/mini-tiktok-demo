@@ -91,7 +91,9 @@ func _followMw() []app.HandlerFunc {
 
 func _relationfollowlistMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _followerMw() []app.HandlerFunc {

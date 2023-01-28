@@ -244,17 +244,32 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 // RelationFollowList .
 // @router /douyin/relation/follow/list [GET]
 func RelationFollowList(ctx context.Context, c *app.RequestContext) {
+	// 关注列表
 	var err error
 	var req api.RelationFollowListReq
+	var resp api.RelationFollowListResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	userId, err := strconv.ParseInt(req.UserID, 10, 64)
+	if err != nil {
+		c.String(consts.StatusOK, "请求参数错误")
+		return
+	}
+	result, err := rpc.UserRpcClient.FollowList(ctx, &userservice.DouyinRelationFollowListRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = "请求错误"
+		c.JSON(consts.StatusOK, resp)
+	}
 
-	resp := new(api.RelationFollowListResp)
-
-	c.JSON(consts.StatusOK, resp)
+	// 此处返回 result 是因为他和 resp 的数据结构类型一直，但是 user 所属的包结构不同，简写省略属性的转化
+	c.JSON(consts.StatusOK, result)
 }
 
 // RelationFollowerList .

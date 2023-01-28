@@ -143,9 +143,41 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 	return
 }
 
-// FollowList implements the UserServiceImpl interface.
+// FollowList implements the UserServiceImpl interface. 关注列表操作
 func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.DouyinRelationFollowListRequest) (resp *userservice.DouyinRelationFollowListResponse, err error) {
-	// TODO: Your code here...
+	resp = &userservice.DouyinRelationFollowListResponse{}
+	// 用于查询关注的用户 id
+	queryFollow := query.Q.TFollow
+	// 根据关注的用户id查询出所有的关注用户
+	queryUser := query.Q.TUser
+	// 只检索关注用户的id
+	follows, err := queryFollow.WithContext(ctx).Select(queryFollow.FollowerID).Where(queryFollow.UserID.Eq(req.UserId)).Find()
+	if err != nil {
+		return
+	}
+	// 用来保存用户id
+	followUserId := make([]int64, len(follows))
+	for i, follow := range follows {
+		followUserId[i] = follow.FollowerID
+	}
+	// 进行查询用户信息
+	t_users, err := queryUser.WithContext(ctx).Where(queryUser.ID.In(followUserId...)).Find()
+	if err != nil {
+		return
+	}
+	//users := make([]userservice.User, len(t_users))
+	var user userservice.User
+
+	for _, u := range t_users {
+		user.Id = u.ID
+		user.FollowCount = u.FollowCount
+		user.FollowerCount = u.FollowerCount
+		user.Name = u.Name
+		user.IsFollow = true
+		resp.UserList = append(resp.UserList, &user)
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "查询关注成功"
 	return
 }
 
