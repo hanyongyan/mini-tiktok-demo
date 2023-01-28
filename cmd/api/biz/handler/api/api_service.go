@@ -7,6 +7,7 @@ import (
 	"mini-tiktok-hanyongyan/cmd/api/biz/model/api"
 	"mini-tiktok-hanyongyan/cmd/api/biz/rpc"
 	"mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
+	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -204,16 +205,39 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 // RelationAction .
 // @router /douyin/relation/action [POST]
 func RelationAction(ctx context.Context, c *app.RequestContext) {
+	// 关注操作
 	var err error
 	var req api.RelationActionReq
+	var resp api.RelationActionResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		resp.StatusMessage = err.Error()
+		resp.StatusCode = 1
 		return
 	}
+	toUserId, toUserIdErr := strconv.ParseInt(req.ToUserID, 10, 64)
+	actionType, actionTypeErr := strconv.ParseInt(req.ActionType, 10, 32)
+	if toUserIdErr != nil || actionTypeErr != nil {
+		resp.StatusCode = 0
+		resp.StatusMessage = "传入的参数错误"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	// userService 完成 关注操作
+	result, err := rpc.UserRpcClient.Action(ctx, &userservice.DouyinRelationActionRequest{
+		Token:      req.Token,
+		ToUserId:   toUserId,
+		ActionType: int32(actionType),
+	})
 
-	resp := new(api.RelationActionResp)
-
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	resp.StatusCode = 0
+	resp.StatusMessage = result.StatusMsg
 	c.JSON(consts.StatusOK, resp)
 }
 

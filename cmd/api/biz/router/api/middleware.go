@@ -4,6 +4,7 @@ package Api
 
 import (
 	"github.com/cloudwego/hertz/pkg/app"
+	"mini-tiktok-hanyongyan/cmd/api/biz/middleware"
 )
 
 func rootMw() []app.HandlerFunc {
@@ -78,7 +79,9 @@ func _relationMw() []app.HandlerFunc {
 
 func _relation_ctionMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _followMw() []app.HandlerFunc {

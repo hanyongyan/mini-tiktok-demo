@@ -87,7 +87,59 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 
 // Action implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRelationActionRequest) (resp *userservice.DouyinRelationActionResponse, err error) {
-	// TODO: Your code here...
+	// 关注操作
+	q := query.Q.TFollow
+	resp = &userservice.DouyinRelationActionResponse{}
+
+	claims, flag := utils.CheckToken(req.Token)
+	// 解析 token 失败
+	if !flag {
+		err = errors.New("token is expired")
+		return
+	}
+	follow := &model.TFollow{
+		UserID:     claims.UserId,
+		FollowerID: req.ToUserId,
+	}
+	if req.ActionType == 1 {
+		// 关注操作
+		resultFollow, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		// 说明还没有关注过
+		if err != nil && err.Error() == "record not found" {
+			err = q.WithContext(ctx).Create(follow)
+			if err != nil {
+				return nil, err
+			}
+			// 进行到此步说明 添加关注成功
+			resp.StatusCode = 0
+			resp.StatusMsg = "关注成功"
+			return resp, nil
+		}
+		// 说明已经关注过
+		if resultFollow != nil {
+			err = errors.New("请勿重复关注！")
+			return nil, err
+		}
+
+	} else {
+		// 取消关注操作
+		// 先进行是否存在这样一种关注关系
+		_, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		// 查询不到用户
+		if err != nil && err.Error() == "record not found" {
+			err = errors.New("请勿重复取消关注")
+			return nil, err
+		}
+
+		// 进行删除数据库中的数据
+		_, err = q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
+		if err != nil {
+			return nil, err
+		}
+		resp.StatusMsg = "取消关注成功"
+		resp.StatusCode = 0
+		return resp, nil
+	}
 	return
 }
 
