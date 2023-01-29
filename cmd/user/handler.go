@@ -81,8 +81,38 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 
 // Info implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserRequest) (resp *userservice.DouyinUserResponse, err error) {
-	// TODO: Your code here...
-	return
+	resp = &userservice.DouyinUserResponse{}
+	queryUser := query.Q.TUser
+	queryFollow := query.Q.TFollow
+
+	// 进行查询当前用户信息
+	user, err := queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.UserId)).First()
+	if err != nil {
+		return
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "查询用户信息成功"
+	// 用户信息进行赋值
+	resp.User.Id = user.ID
+	resp.User.Name = user.Name
+	resp.User.FollowerCount = user.FollowerCount
+	resp.User.FollowCount = user.FollowCount
+	// 进行查询是否关注
+	claims, flag := utils.CheckToken(req.Token)
+	if !flag {
+		return nil, errors.New("用户验证错误")
+	}
+	_, err = queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(claims.UserId)).Where(queryFollow.FollowerID.Eq(user.ID)).First()
+	if err != nil {
+		// 如果查询不到当前关注信息，说明未关注此用户
+		if err.Error() == "record not found" {
+			resp.User.IsFollow = false
+			return resp, nil
+		}
+		return nil, err
+	}
+	resp.User.IsFollow = true
+	return resp, nil
 }
 
 // Action implements the UserServiceImpl interface.

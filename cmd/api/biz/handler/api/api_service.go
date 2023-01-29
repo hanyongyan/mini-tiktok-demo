@@ -95,15 +95,30 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 func User(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.UserReq
+	resp := new(api.UserResp)
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	userId, err := strconv.ParseInt(req.UserID, 10, 64)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = "传入数据错误"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	result, err := rpc.UserRpcClient.Info(ctx, &userservice.DouyinUserRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = "数据查询错误"
+		c.JSON(consts.StatusOK, resp)
+	}
 
-	resp := new(api.UserResp)
-
-	c.JSON(consts.StatusOK, resp)
+	c.JSON(consts.StatusOK, result)
 }
 
 // PublishAction .

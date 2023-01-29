@@ -23,8 +23,9 @@ func _feedMw() []app.HandlerFunc {
 }
 
 func _userMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _commentMw() []app.HandlerFunc {
