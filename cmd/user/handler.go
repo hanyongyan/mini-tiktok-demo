@@ -166,9 +166,10 @@ func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.Douyi
 		return
 	}
 	//users := make([]userservice.User, len(t_users))
-	var user userservice.User
 
 	for _, u := range t_users {
+		var user userservice.User
+
 		user.Id = u.ID
 		user.FollowCount = u.FollowCount
 		user.FollowerCount = u.FollowerCount
