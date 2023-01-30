@@ -114,7 +114,9 @@ func _friendMw() []app.HandlerFunc {
 
 func _relationfriendlistMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _user0Mw() []app.HandlerFunc {
