@@ -9,7 +9,9 @@ import (
 
 func rootMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.RequestLogger(),
+	}
 }
 
 func _douyinMw() []app.HandlerFunc {
