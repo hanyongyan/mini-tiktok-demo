@@ -8,3 +8,8 @@ redis:
   addr: "localhost:6379"
   password: ""
   database: 0
+
+cos:
+  secretid: "xxx" # 密钥 id
+  secretkey: "xxx"   # 密钥 key
+  url: "https://{xxx}.cos.{xxx}.myqcloud.com"

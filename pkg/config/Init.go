@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/spf13/viper"
+	"mini-tiktok-hanyongyan/cmd/video/cos"
 	"mini-tiktok-hanyongyan/pkg/cache"
 	"mini-tiktok-hanyongyan/pkg/dal"
 	"os"
@@ -19,6 +20,8 @@ func Init() {
 	dal.Init()
 	// 初始化 Redis
 	cache.Init()
+	// 初始化 cos
+	cos.Init()
 }
 
 func viperInit(path string) error {
