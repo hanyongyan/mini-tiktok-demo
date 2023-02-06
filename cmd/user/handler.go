@@ -88,10 +88,11 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 	// 进行查询当前用户信息
 	user, err := queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.UserId)).First()
 	if err != nil {
-		return
+		return nil, err
 	}
 	resp.StatusCode = 0
 	resp.StatusMsg = "查询用户信息成功"
+	resp.User = &userservice.User{}
 	// 用户信息进行赋值
 	resp.User.Id = user.ID
 	resp.User.Name = user.Name
