@@ -17,7 +17,7 @@ func Init() {
 
 func main() {
 	Init()
-	h := server.Default(server.WithHostPorts(":8080"))
+	h := server.Default(server.WithHostPorts("0.0.0.0:8080"))
 
 	register(h)
 
