@@ -6,7 +6,7 @@ import (
 	"context"
 	"mini-tiktok-hanyongyan/cmd/api/biz/model/api"
 	"mini-tiktok-hanyongyan/cmd/api/biz/rpc"
-	"mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
+	userservice "mini-tiktok-hanyongyan/cmd/user/kitex_gen/userService"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mini-tiktok-hanyongyan/cmd/user/kitex_gen/userservice"
+	userservice "mini-tiktok-hanyongyan/cmd/user/kitex_gen/userService"
 	"mini-tiktok-hanyongyan/pkg/dal/model"
 	"mini-tiktok-hanyongyan/pkg/dal/query"
 	"mini-tiktok-hanyongyan/pkg/utils"
