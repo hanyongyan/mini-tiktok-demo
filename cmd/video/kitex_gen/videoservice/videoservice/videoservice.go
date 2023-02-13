@@ -4,12 +4,12 @@ package videoservice
 
 import (
 	"context"
-	videoservice "mini-tiktok-hanyongyan/cmd/video/kitex_gen/videoservice"
 	"fmt"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
+	videoservice "mini-tiktok-hanyongyan/cmd/video/kitex_gen/videoService"
 )
 
 func serviceInfo() *kitex.ServiceInfo {

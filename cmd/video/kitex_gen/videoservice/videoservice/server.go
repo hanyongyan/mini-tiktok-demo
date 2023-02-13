@@ -2,8 +2,8 @@
 package videoservice
 
 import (
-	videoservice "mini-tiktok-hanyongyan/cmd/video/kitex_gen/videoservice"
 	server "github.com/cloudwego/kitex/server"
+	videoservice "mini-tiktok-hanyongyan/cmd/video/kitex_gen/videoService"
 )
 
 // NewServer creates a server.Server with the given handler and options.

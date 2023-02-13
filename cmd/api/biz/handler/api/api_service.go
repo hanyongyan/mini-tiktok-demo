@@ -7,6 +7,8 @@ import (
 	"mini-tiktok-hanyongyan/cmd/api/biz/model/api"
 	"mini-tiktok-hanyongyan/cmd/api/biz/rpc"
 	userservice "mini-tiktok-hanyongyan/cmd/user/kitex_gen/userService"
+	"mini-tiktok-hanyongyan/cmd/video/kitex_gen/videoService"
+	"net/http"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -124,16 +126,35 @@ func User(ctx context.Context, c *app.RequestContext) {
 // PublishAction .
 // @router /douyin/publish/action [POST]
 func PublishAction(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req api.PublishActionReq
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+	var req videoservice.DouyinPublishActionRequest
+	req.Title = c.PostForm("title")
+	req.Token = c.PostForm("token")
+
+	// 获取上传的视频文件
+	file, _ := c.FormFile("data")
+	fd, _ := file.Open()
+	// 将视频文件转为 byte 数组
+	data := make([]byte, file.Size)
+	fd.Read(data)
+	fd.Close()
+	req.Data = data
+	if len(req.Title) == 0 {
+		c.JSON(http.StatusOK, api.PublishActionResp{
+			StatusCode:    1,
+			StatusMessage: "视频标题不能为空",
+		})
 		return
 	}
 
-	resp := new(api.PublishActionResp)
-
+	resp, err := rpc.VideoRpcClient.PublishAction(ctx, &req)
+	if err != nil {
+		c.JSON(http.StatusOK, api.PublishActionResp{
+			StatusCode:    1,
+			StatusMessage: "视频上传失败",
+		})
+		return
+	}
+	resp.StatusCode = 0
 	c.JSON(consts.StatusOK, resp)
 }
 

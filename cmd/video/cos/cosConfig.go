@@ -10,7 +10,7 @@ import (
 
 // Author: Hanyongyan
 
-var cosClient *cos.Client
+var Cos *cos.Client
 
 // Init cos 初始化
 func Init() {
@@ -20,14 +20,11 @@ func Init() {
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			// 通过环境变量获取密钥
-			// 环境变量 COS_SECRETID 表示用户的 SecretId，登录访问管理控制台查看密钥，https://console.cloud.tencent.com/cam/capi
-			SecretID: viper.GetString("cos.secretid"),
-			// 环境变量 COS_SECRETKEY 表示用户的 SecretKey，登录访问管理控制台查看密钥，https://console.cloud.tencent.com/cam/capi
+			SecretID:  viper.GetString("cos.secretid"),
 			SecretKey: viper.GetString("cos.secretkey"),
 		},
 	})
-	cosClient = c
+	Cos = c
 }
 
 // LogStatus 用于检测是否报错

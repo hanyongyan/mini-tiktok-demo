@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+var GlobalConfigs GlobalConfig
+
 func Init() {
 	// 初始化 viper
 	err := viperInit("./pkg/config/config.yaml")
@@ -32,6 +34,10 @@ func viperInit(path string) error {
 	viper.SetConfigName("config") // name of config file (without extension)
 	viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
 	err = viper.ReadConfig(bytes.NewBuffer(configFile))
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+	err = viper.Unmarshal(&GlobalConfigs)
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
